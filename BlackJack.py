@@ -1,13 +1,25 @@
-# List Append Pop with Loop
+# Function Calls, Parametere and Return
 
 import random
 
-deck = [str(i) for i in range(2, 11)] + ['J', 'Q', 'K', 'A']
+def initialize_deck():
+    deck = [str(i) for i in range(2, 11)] + ['J', 'Q', 'K', 'A']
+    deck *= 4 #Multiplies all the cards by 4, ignore Suit
+    random.shuffle(deck)
+    return deck
 
+def draw_card(deck):
+    card = deck.pop()
+    return card
 
-deck *= 4 #Multiplies all the cards by 4, ignore Suit
-print("Number of cards in the deck: ", len(deck))
-print(deck)
+def main():
+    card_deck = initialize_deck()
+    player_hand = [draw_card(card_deck), draw_card(card_deck)]
+    dealer_hand = [draw_card(card_deck), draw_card(card_deck)]
+    print(player_hand)
+    print(dealer_hand)
 
+if __name__ == '__main__' :
+    main()
 
 
