@@ -20,7 +20,7 @@ def card_value(card):
     else:
         return int(card)
 
-def calculate_hand(hand):
+def calculate_hand_value(hand):
 
     value = sum(card_value(card) for card in hand) #generator expression
     ace_count = hand.count('A')
@@ -36,8 +36,28 @@ def main():
     card_deck = initialize_deck()
     player_hand = [draw_card(card_deck), draw_card(card_deck)]
     dealer_hand = [draw_card(card_deck), draw_card(card_deck)]
-    print(player_hand, "Hand Value: ", calculate_hand(player_hand))
-    print(dealer_hand, "Hand Value: ", calculate_hand(dealer_hand))
+
+    while True:
+        player_value = calculate_hand_value(player_hand)
+        print(f"Your face up card: {player_hand}  Value: {player_value}")
+        print(f"Dealer face up card: {dealer_hand[0]} ")
+
+        if player_value > 21:
+            print("You bust! Game Over!")
+            break
+
+        action = input("Do you want to (H)it or (S)tand? (Type H for hit or S for stand): ").upper()
+
+        if action == 'H':
+            player_hand.append(draw_card(card_deck))
+        elif action == 'S':
+            break
+        else:
+            print("Invalid Input")
+
+
+
+
 
 if __name__ == '__main__' :
     main()
