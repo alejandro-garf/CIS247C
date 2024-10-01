@@ -21,12 +21,13 @@ def card_value(card):
         return int(card)
 
 def calculate_hand(hand):
-    value = 0;
-    for card in hand: #loops through every card in the hand
-        value += card_value(card)
 
-    if value > 21 and 'A' in hand:
+    value = sum(card_value(card) for card in hand) #generator expression
+    ace_count = hand.count('A')
+
+    if value > 21 and ace_count > 0:
         value -= 10
+        ace_count -= 1
 
     return value
 
