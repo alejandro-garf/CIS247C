@@ -51,7 +51,26 @@ def main():
         if action == 'H':
             player_hand.append(draw_card(card_deck))
         elif action == 'S':
+            print(f"Dealer shows his face down card: {dealer_hand[1]}" )
+            dealer_value = calculate_hand_value(dealer_hand)
+            while dealer_value < 17:
+                new_card = draw_card(card_deck)
+                print(f"Dealer picks new card: {new_card}")
+                dealer_hand.append(new_card)
+                dealer_value = calculate_hand_value(dealer_hand)
+
+            print (f"Dealers Hand: {dealer_hand}   Value: {dealer_value}")
+            if dealer_value > 21:
+                print("Dealer Busts! You Win!")
+            elif dealer_value > player_value:
+                print("Dealer Wins!")
+            elif player_value > dealer_value:
+                print("Player Wins!")
+            else:
+                print("It's a tie!")
             break
+
+
         else:
             print("Invalid Input")
 
