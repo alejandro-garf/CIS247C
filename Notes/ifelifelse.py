@@ -1,3 +1,4 @@
+import random
 
 def compare(value):
     try:
@@ -11,7 +12,12 @@ def compare(value):
             print("The guess is too low, try again!")
         else:
             print("The guess is correct! Congrats!")
+        return False
     except ValueError as ve:
         print(ve)
+        return False
 
-compare(5)
+random_value = random.randint(1,10)
+while True:
+    if compare(random_value):
+        break
