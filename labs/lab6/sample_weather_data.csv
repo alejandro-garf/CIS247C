@@ -1,11 +1,6 @@
-City,Timestamp,Temperature,Humidity
-Los Angeles,2023-10-02 11:53:40,8,50
-Orange,2023-10-02 11:53:40,14,44
-Anaheim,2023-10-02 11:53:40,29,61
-Cypress,2023-10-02 11:53:40,14,62
-Whittier,2023-10-02 11:53:40,17,49
-La Mirada,2023-10-02 11:53:40,36,55
-Long Beach,2023-10-02 11:53:40,35,53
-Garden Grove,2023-10-02 11:53:40,24,21
-Burbank,2023-10-02 11:53:40,21,35
-Fullerton,2023-10-02 11:53:40,10,42
+Station,City,Timestamp,Temperature
+KMYV,Marysville,2024-10-16 23:11:15,8
+KSMX,Santa Maria,2024-10-16 23:11:15,1
+KWVI,Watsonville,2024-10-16 23:11:15,20
+KLVK,Livermore,2024-10-16 23:11:15,26
+KFOT,Fortuna,2024-10-16 23:11:15,9
