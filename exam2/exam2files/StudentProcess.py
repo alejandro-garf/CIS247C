@@ -10,20 +10,29 @@ def get_class_overview():
     classes = get_classes()
     instructors = get_instructor()
     if not classes or not instructors:
-        return []
+        return {"columns": {}, "data": []}
+
+    #Create a lookup directory for the instructor
+    instructor_dict = {i["InstructorID"]: i for i in instructors}
 
     class_overview_data = []
-    instructor_dict = {i["InstructorID"]: i for i in instructors}
     for class_info in classes:
         instructor = instructor_dict.get(class_info["InstructorID"], {})
-        merged_class_info = class_info.copy()
-        merged_class_info["Instructor"] = instructor.get("Name", "Unknown")
-        class_overview_data.append(merged_class_info)
+        class_data = {
+            "ClassName": class_info["ClassName"],
+            "Credits": class_info["Credits"],
+            "ClassType": class_info["ClassType"],
+            "Instructor": instructor.get("Name", "Unknown")
+        }
+        class_overview_data.append(class_data)
 
-    columns = {key: key for key in classes[0].keys()}
-    columns["Instructor"] = "Instructor"
-    del columns["ClassID"]
-    del columns["InstructorID"]
+    #Define Columns
+    columns = {
+        "ClassName": "ClassName",
+        "Credits": "Credits",
+        "ClassType": "ClassType",
+        "Instructor": "Instructor"
+    }
 
     return {"columns": columns, "data": class_overview_data}
 
