@@ -22,7 +22,8 @@ def get_class_overview():
             "ClassName": class_info["ClassName"],
             "Credits": class_info["Credits"],
             "ClassType": class_info["ClassType"],
-            "Instructor": instructor.get("Name", "Unknown")
+            "Instructor": instructor.get("Name", "Unknown"),
+            "ClassID": class_info["ClassID"]
         }
         class_overview_data.append(class_data)
 
@@ -41,13 +42,21 @@ def get_students_enrolled_in_class(class_id):
     grades = get_grades()
     students = get_students()
 
-    ungraded_class_grades = [g for g in grades if g["ClassID"] == class_id and not g["Grade"]]
+    # Convert class_id to string
+    class_id = str(class_id)
+
+    # Get all students who are enrolled
     enrolled_students = []
-    for s in students:
-        for ug in ungraded_class_grades:
-            if s["StudentID"] == ug["StudentID"]:
-                enrolled_students.append(s)
-                break
+
+    # Create a lookup dictionary for students
+    student_dict = {str(s["StudentID"]): s for s in students}
+
+    # Find all students enrolled in this class
+    for grade in grades:
+        if str(grade["ClassID"]) == class_id and not grade["Grade"]:  # No grade means currently enrolled
+            student_id = str(grade["StudentID"])
+            if student_id in student_dict:
+                enrolled_students.append(student_dict[student_id])
 
     return enrolled_students
 
