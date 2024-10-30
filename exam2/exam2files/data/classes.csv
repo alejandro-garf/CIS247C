@@ -1,0 +1,31 @@
+ClassID,ClassName,Credits,ClassType,InstructorID
+101,Math,3,Core,1
+102,History,2,Elective,2
+103,Science,4,Core,3
+104,English,2,Core,2
+105,Physics,3,Core,3
+106,Chemistry,3,Core,4
+107,Biology,3,Core,4
+108,Philosophy,2,Elective,2
+109,Computer Science,4,Core,5
+110,Art,2,Elective,6
+111,Economics,3,Core,7
+112,Psychology,3,Core,8
+113,Sociology,2,Elective,9
+114,Political Science,4,Core,7
+115,Music,2,Elective,6
+116,Literature,3,Core,10
+117,Astronomy,4,Elective,11
+118,Statics,4,Elective,11
+119,Anthropology,3,Elective,12
+120,Statistics,3,Core,13
+121,Geography,2,Elective,14
+122,Engineering,4,Core,15
+123,Drama,2,Elective,16
+124,Calculus,4,Core,1
+125,Advanced Physics,4,Core,3
+126,Environmental Science,3,Core,17
+127,World History,3,Elective,2
+128,Political Theory,4,Core,7
+129,Modern Art,2,Elective,6
+130,Graphic Design,3,Elective,18
