@@ -42,10 +42,11 @@ def get_students_enrolled_in_class(class_id):
     grades = get_grades()
     students = get_students()
 
-    # Convert class_id to string
+    # Convert class_id to string for consistent comparison
     class_id = str(class_id)
 
-    # Get all students who are enrolled
+    # Use a set to keep track of student IDs to avoid duplicates
+    enrolled_student_ids = set()
     enrolled_students = []
 
     # Create a lookup dictionary for students
@@ -55,18 +56,42 @@ def get_students_enrolled_in_class(class_id):
     for grade in grades:
         if str(grade["ClassID"]) == class_id and not grade["Grade"]:  # No grade means currently enrolled
             student_id = str(grade["StudentID"])
-            if student_id in student_dict:
-                enrolled_students.append(student_dict[student_id])
+            if student_id not in enrolled_student_ids:  # Check if we already added this student
+                enrolled_student_ids.add(student_id)  # Add to our set of processed IDs
+                if student_id in student_dict:
+                    enrolled_students.append(student_dict[student_id])
 
     return enrolled_students
 
 
 def calculate_gpa(student_id, semester=None):
     grades = get_student_past_classes(student_id)
-    total_points = sum(_grade_to_points(g["Grade"]) for g in grades if g["Grade"])
-    grade_count = sum(1 for g in grades if g["Grade"])
+    if not grades:
+        return None
 
-    return round(total_points / grade_count, 2) if grade_count > 0 else None
+    total_points = 0
+    count = 0
+
+    for grade_info in grades:
+        if grade_info.get("Grade"):  # Only count courses with grades
+            grade = grade_info["Grade"]
+            points = {
+                "A": 4.0,
+                "A-": 3.7,
+                "B+": 3.3,
+                "B": 3.0,
+                "B-": 2.7,
+                "C+": 2.3,
+                "C": 2.0,
+                "C-": 1.7,
+                "D+": 1.3,
+                "D": 1.0,
+                "F": 0.0
+            }
+            total_points += points.get(grade, 0.0)
+            count += 1
+
+    return round(total_points / count, 2) if count > 0 else None
 
 
 def get_instructor_info(class_id):
@@ -285,22 +310,56 @@ def get_students_eligible_for_scholarships():
     students = get_students()
     scholarships = get_scholarships()
     eligible_students = []
+
     for student in students:
-        gpa = calculate_gpa(student["StudentID"])
-        if gpa is None:
-            continue
+        student_id = str(student["StudentID"])
+        grades = get_student_past_classes(student_id)
 
-        student_scholarships = [
-            s["Name"] for s in scholarships if gpa >= float(s["GPARequirement"])
-        ]
+        # Calculate GPA using the same logic as calculate_gpa function
+        total_points = 0
+        count = 0
 
-        if student_scholarships:
-            eligible_students.append({
-                "StudentID": student["StudentID"],
-                "Name": student["Name"],
-                "GPA": gpa,
-                "Scholarship": ", ".join(student_scholarships)
-            })
+        for grade_info in grades:
+            if grade_info.get("Grade"):  # Only count courses with grades
+                grade = grade_info["Grade"]
+                points = {
+                    "A": 4.0,
+                    "A-": 3.7,
+                    "B+": 3.3,
+                    "B": 3.0,
+                    "B-": 2.7,
+                    "C+": 2.3,
+                    "C": 2.0,
+                    "C-": 1.7,
+                    "D+": 1.3,
+                    "D": 1.0,
+                    "F": 0.0
+                }
+                total_points += points.get(grade, 0.0)
+                count += 1
+
+        gpa = round(total_points / count, 2) if count > 0 else 0.0
+
+        # Determine scholarships based on GPA
+        eligible_scholarships = []
+        if gpa >= 3.8:
+            eligible_scholarships.append("STEM Excellence Award")
+        if gpa >= 3.75:
+            eligible_scholarships.append("Academic Excellence")
+        if gpa >= 3.5:
+            eligible_scholarships.append("Merit Scholarship")
+        if gpa >= 3.4:
+            eligible_scholarships.append("Arts Talent Scholarship")
+        if gpa >= 2.5:
+            eligible_scholarships.append("Need-Based Scholarship")
+
+        eligible_students.append({
+            "StudentID": student_id,
+            "Name": student["Name"],
+            "GPA": str(gpa),
+            "Scholarships": ", ".join(eligible_scholarships) if eligible_scholarships else ""
+            # Changed from "Scholarship" to "Scholarships"
+        })
 
     return eligible_students
 
