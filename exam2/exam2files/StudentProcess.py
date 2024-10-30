@@ -63,10 +63,35 @@ def get_students_enrolled_in_class(class_id):
 
 def calculate_gpa(student_id, semester=None):
     grades = get_student_past_classes(student_id)
-    total_points = sum(_grade_to_points(g["Grade"]) for g in grades if g["Grade"])
-    grade_count = sum(1 for g in grades if g["Grade"])
+    if not grades:
+        return None
 
-    return round(total_points / grade_count, 2) if grade_count > 0 else None
+    def _grade_to_points(grade):
+        points = {
+            "A": 4.0,
+            "A-": 3.7,
+            "B+": 3.3,
+            "B": 3.0,
+            "B-": 2.7,
+            "C+": 2.3,
+            "C": 2.0,
+            "C-": 1.7,
+            "D+": 1.3,
+            "D": 1.0,
+            "F": 0.0
+        }
+        return points.get(grade, 0.0)
+
+    total_points = 0
+    count = 0
+
+    for grade_info in grades:
+        if grade_info.get("Grade"):  # Only count courses with grades
+            grade = grade_info["Grade"]
+            total_points += _grade_to_points(grade)
+            count += 1
+
+    return round(total_points / count, 2) if count > 0 else None
 
 
 def get_instructor_info(class_id):
