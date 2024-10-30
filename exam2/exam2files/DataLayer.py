@@ -18,11 +18,15 @@ def read_csv(file_name):
         return []
 
 
-def append_csv(file_name, fieldnames, rows):
-    with open(DATA_PATH + file_name, mode='a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(rows)
+def append_csv(file_name, fieldnames, row):
+    try:
+        with open(DATA_PATH + file_name, mode='a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writerow(row)  # Write only the new row
+        return True
+    except Exception as e:
+        print(f"Error appending to {file_name}: {str(e)}")
+        return False
 
 
 def get_students():

@@ -63,35 +63,10 @@ def get_students_enrolled_in_class(class_id):
 
 def calculate_gpa(student_id, semester=None):
     grades = get_student_past_classes(student_id)
-    if not grades:
-        return None
+    total_points = sum(_grade_to_points(g["Grade"]) for g in grades if g["Grade"])
+    grade_count = sum(1 for g in grades if g["Grade"])
 
-    def _grade_to_points(grade):
-        points = {
-            "A": 4.0,
-            "A-": 3.7,
-            "B+": 3.3,
-            "B": 3.0,
-            "B-": 2.7,
-            "C+": 2.3,
-            "C": 2.0,
-            "C-": 1.7,
-            "D+": 1.3,
-            "D": 1.0,
-            "F": 0.0
-        }
-        return points.get(grade, 0.0)
-
-    total_points = 0
-    count = 0
-
-    for grade_info in grades:
-        if grade_info.get("Grade"):  # Only count courses with grades
-            grade = grade_info["Grade"]
-            total_points += _grade_to_points(grade)
-            count += 1
-
-    return round(total_points / count, 2) if count > 0 else None
+    return round(total_points / grade_count, 2) if grade_count > 0 else None
 
 
 def get_instructor_info(class_id):
@@ -194,6 +169,46 @@ def add_future_class(student_id, class_id, semester, year):
     valid_semesters = {"Fall", "Spring", "Summer"}
     if semester not in valid_semesters or not year.isdigit():
         raise ValueError("Invalid semester or year.")
+
+    # Convert IDs to strings for consistency
+    student_id = str(student_id)
+    class_id = str(class_id)
+
+    grades = get_grades()
+    # Check for existing enrollment
+    if any(str(g["StudentID"]) == student_id and str(g["ClassID"]) == class_id for g in grades):
+        return "Record already exists"
+
+    # Verify student exists
+    students = get_students()
+    if not any(str(student["StudentID"]) == student_id for student in students):
+        return "Student does not exist"
+
+    # Verify class exists
+    classes = get_classes()
+    if not any(str(c["ClassID"]) == class_id for c in classes):
+        return "Class does not exist"
+
+    # Create new enrollment
+    new_row = {
+        "StudentID": student_id,
+        "ClassID": class_id,
+        "Grade": "",
+        "Year": year,
+        "Semester": semester,
+        "Exam1": "",
+        "Exam2": "",
+        "Assignments": ""
+    }
+
+    # Define the field order to match the CSV
+    fieldnames = ["StudentID", "ClassID", "Grade", "Year", "Semester", "Exam1", "Exam2", "Assignments"]
+
+    # Append the new row
+    if append_csv("grades.csv", fieldnames, new_row):
+        return "Success"
+    else:
+        return "Failed to add class"
 
     grades = get_grades()
     if any(g["StudentID"] == student_id and g["ClassID"] == class_id for g in grades):
