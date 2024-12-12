@@ -1,4 +1,5 @@
 # WeatherData.py
+# Alejandro Fonseca - Exam 3
 
 import requests
 import json

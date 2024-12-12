@@ -1,4 +1,5 @@
 # WeatherApp.py
+# Alejandro Fonseca - Exam 3
 
 from ProcessData import WeatherDataManager
 from WeatherData import WeatherDataFetcher
@@ -9,11 +10,13 @@ california_station_codes_with_cities = WeatherDataManager.load_data("california_
 
 
 def main():
+    fetcher = WeatherDataFetcher()  # Create instance
+    manager = WeatherDataManager('weather_data.pkl')  # Create instance with filename
     all_weather_data = []
 
     for station_code in california_station_codes_with_cities:
         try:
-            station_weather_data = WeatherDataFetcher.fetch_weather_data(station_code)
+            station_weather_data = fetcher.fetch_weather_data(station_code)  # Use instance method
         except Exception as e:
             print(f"An error occurred while fetching data for station {station_code}: {e}")
             continue
@@ -28,7 +31,7 @@ def main():
             station_weather_data["Station"] = station_code
             station_weather_data["City"] = city_name
             all_weather_data.append(station_weather_data)
-            WeatherDataManager.append_to_pickle(station_weather_data)
+            manager.append_to_pickle(station_weather_data)  # Use instance method
 
     print("\nAll weather data added:")
     print(all_weather_data)

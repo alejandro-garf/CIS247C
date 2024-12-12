@@ -1,4 +1,5 @@
 # WeatherGUI.py
+# Alejandro Fonseca - Exam 3
 
 import tkinter as tk
 from tkinter import messagebox
@@ -71,8 +72,11 @@ class WeatherAppGUI:
                 station_weather_data = self.wdf.fetch_weather_data(station_code)
             elif button_type == "historical":
                 station_weather_data = self.wdm.get_most_recent_data_for_station(station_code)
+            elif button_type == "forecast":
+                station_weather_data = self.wdf.fetch_weather_data(station_code, coordinates=True)
             else:
                 raise ValueError("Invalid data type specified")
+
             if station_weather_data:
                 self.display_weather_data(station_weather_data, station_code)
             else:
