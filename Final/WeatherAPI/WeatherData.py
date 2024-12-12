@@ -19,14 +19,7 @@ class WeatherDataFetcher:
     def convert_unit(self, unit_code):
         return self.unit_mappings.get(unit_code, unit_code)
 
-    """
-    Fetch weather data from an API endpoint.
-    Args:
-        station_code (str): 4 digit code for NWS locations.
-    Returns:
-        dict: The weather data in JSON format.
-    """
-    def fetch_weather_data(self, station_code, coordinates=False):  # https://api.weather.gov/openapi.json
+    def fetch_weather_data(self, station_code, coordinates=False):
         url = f"{self.base_url}stations/{station_code}/observations/latest"
         try:
             response = requests.get(url)
@@ -55,7 +48,6 @@ class WeatherDataFetcher:
                 "Humidity": f"{properties['relativeHumidity']['value']} %"
             }
             return weather_data
-
         except KeyError as e:
             print(f"Missing key in data: {e}")
             return None
@@ -82,27 +74,17 @@ class WeatherDataFetcher:
         lat = data['geometry']['coordinates'][1]
         lon = data['geometry']['coordinates'][0]
         forecast_data = self.get_forecast_data(lat, lon)
-        if forecast_data:
-            target_time = datetime.now(timezone.utc) + timedelta(hours=24)
-            closest_period = None
-            min_time_diff = timedelta.max
-            for period in forecast_data['properties']['periods']:
-                start_time = datetime.fromisoformat(period['startTime'])
-                time_diff = abs(start_time - target_time)
-                if time_diff < min_time_diff:
-                    min_time_diff = time_diff
-                    closest_period = period
 
-            if closest_period:
-                forecast_info = {
-                    "Timestamp": closest_period['startTime'],
-                    "Temperature": f"{closest_period['temperature']} {self.convert_unit(closest_period['temperatureUnit'])}",
-                    "Dewpoint": f"{closest_period['dewpoint']['value']} {self.convert_unit(closest_period['dewpoint']['unitCode'])}",
-                    "Wind Speed": closest_period['windSpeed'],
-                    "Humidity": f"{closest_period['relativeHumidity']['value']} {self.convert_unit(closest_period['relativeHumidity']['unitCode'])}",
-                    "Description": closest_period['detailedForecast']
-                }
-                return forecast_info
+        if forecast_data and 'properties' in forecast_data and 'periods' in forecast_data['properties']:
+            closest_period = forecast_data['properties']['periods'][0]  # Get the first period
+
+            forecast_info = {
+                "Timestamp": closest_period['startTime'],
+                "Temperature": f"{closest_period['temperature']}",
+                "Wind Speed": closest_period['windSpeed'],
+                "Description": closest_period['detailedForecast']
+            }
+            return forecast_info
         return {}
 
 
@@ -110,7 +92,5 @@ if __name__ == "__main__":
     fetcher = WeatherDataFetcher()
     test_station_code = "KSFO"  # San Francisco as an example
     station_data = fetcher.fetch_weather_data(test_station_code)
-
     if station_data:
-        print(f"Weather Data for station {test_station_code}:\n")
         print(station_data)

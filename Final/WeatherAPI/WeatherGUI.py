@@ -3,7 +3,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
-from WeatherMockData import WeatherDataFetcher
+from WeatherData import WeatherDataFetcher
 from ProcessData import WeatherDataManager
 from WeatherApp import california_station_codes_with_cities
 
@@ -31,7 +31,8 @@ class WeatherAppGUI:
         self.station_listbox = tk.Listbox(listbox_frame)
         self.station_listbox.pack(side='left', fill='both', expand=True)
         for station_code in california_station_codes_with_cities:
-            self.station_listbox.insert(tk.END, f"{station_code} - {california_station_codes_with_cities[station_code]}")
+            self.station_listbox.insert(tk.END,
+                                        f"{station_code} - {california_station_codes_with_cities[station_code]}")
         self._scrollbar = tk.Scrollbar(listbox_frame, orient=tk.VERTICAL)
         self._scrollbar.pack(side='right', fill=tk.Y)
         self._scrollbar.config(command=self.station_listbox.yview)
@@ -70,41 +71,74 @@ class WeatherAppGUI:
         try:
             if button_type == "live":
                 station_weather_data = self.wdf.fetch_weather_data(station_code)
+                print("Debug - Raw API Data:", station_weather_data)
+
+                if station_weather_data:
+                    # Add station and city to the existing data
+                    station_weather_data["Station"] = station_code
+                    station_weather_data["City"] = california_station_codes_with_cities.get(station_code,
+                                                                                            'Unknown City')
+
+                    # Save data to pickle
+                    self.wdm.append_to_pickle(station_weather_data)
+
+                    # Display the data
+                    self.display_weather_data(station_weather_data, station_code)
+                else:
+                    self.weather_data_display.delete(1.0, tk.END)
+                    self.weather_data_display.insert(tk.END, f"No data available for {station_code}")
+
             elif button_type == "historical":
                 station_weather_data = self.wdm.get_most_recent_data_for_station(station_code)
+                if station_weather_data:
+                    self.display_weather_data(station_weather_data, station_code)
+                else:
+                    self.weather_data_display.delete(1.0, tk.END)
+                    self.weather_data_display.insert(tk.END, f"No historical data available for {station_code}")
             elif button_type == "forecast":
-                station_weather_data = self.wdf.fetch_weather_data(station_code, coordinates=True)
-            else:
-                raise ValueError("Invalid data type specified")
+                forecast_data = self.wdf.fetch_weather_data(station_code, coordinates=True)
+                print("Debug - Forecast Data:", forecast_data)  # Debug print
 
-            if station_weather_data:
-                self.display_weather_data(station_weather_data, station_code)
-            else:
-                self.weather_data_display.delete(1.0, tk.END)
-                self.weather_data_display.insert(tk.END, f"No Data")
+                if forecast_data:
+                    self.display_forecast_data(forecast_data, station_code)
+                else:
+                    self.weather_data_display.delete(1.0, tk.END)
+                    self.weather_data_display.insert(tk.END, f"No forecast data available")
+
         except Exception as e:
             messagebox.showerror("Error", f"An error occurred: {e}")
+            print(f"Debug - Error details: {str(e)}")  # Debug print
 
     def display_weather_data(self, weather_data, station_code):
         city_name = california_station_codes_with_cities.get(station_code, 'Unknown City')
         self.weather_data_display.delete(1.0, tk.END)
         self.weather_data_display.insert(tk.END, f"Weather Data for {station_code} ({city_name}):\n")
 
-        # Format the display data
-        formatted_data = {
-            "Timestamp": weather_data.get('timestamp', 'N/A'),
-            "Description": weather_data.get('textDescription', 'N/A'),
-            "Temperature": f"{weather_data.get('temperature', {}).get('value', 'N/A')} °C",
-            "Dewpoint": f"{weather_data.get('dewpoint', {}).get('value', 'N/A')} °C",
-            "Wind Speed": f"{weather_data.get('windSpeed', {}).get('value', 'N/A')} km/h",
-            "Humidity": f"{weather_data.get('relativeHumidity', {}).get('value', 'N/A')} %"
+        display_order = ['Timestamp', 'Description', 'Temperature', 'Dewpoint',
+                         'Wind Speed', 'Humidity', 'Station', 'City']
+
+        for key in display_order:
+            value = weather_data.get(key, 'N/A')
+            self.weather_data_display.insert(tk.END, f"{key}: {value}\n")
+
+    def display_forecast_data(self, forecast_data, station_code):
+        city_name = california_station_codes_with_cities.get(station_code, 'Unknown City')
+        self.weather_data_display.delete(1.0, tk.END)
+        self.weather_data_display.insert(tk.END, f"Weather Data for {station_code} ({city_name}):\n")
+
+        # Format and display forecast data differently
+        display_data = {
+            "Timestamp": forecast_data.get('Timestamp', 'N/A'),
+            "Temperature": f"{forecast_data.get('Temperature')} F",
+            "Wind Speed": forecast_data.get('Wind Speed', 'N/A'),
+            "Description": forecast_data.get('Description', 'N/A')
         }
 
-        for key, value in formatted_data.items():
+        for key, value in display_data.items():
             self.weather_data_display.insert(tk.END, f"{key}: {value}\n")
 
     def display_manager_details(self):
-        manager_details = str(self.wdm)
+        manager_details = f"Filename: {self.wdm.pickle_filename}"
         messagebox.showinfo("Format Details", manager_details)
 
 
@@ -112,5 +146,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = WeatherAppGUI(root)
     root.mainloop()
-
-

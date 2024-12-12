@@ -60,13 +60,32 @@ class WeatherDataManager:
         Returns:
             dict: Most recent weather data for the station.
         """
-        all_data = self.read_from_pickle()
-        station_data = [entry for entry in all_data if entry["Station"] == station_code]
-        if not station_data:
-            return None
-        most_recent_data = max(station_data, key=lambda x: x["Timestamp"])
-        return most_recent_data
+        try:
+            all_data = self.read_from_pickle()
+            if not all_data:
+                return None
 
+            station_data = [entry for entry in all_data if entry.get("Station") == station_code]
+            if not station_data:
+                return None
+
+            # Get most recent data
+            most_recent_data = station_data[-1]  # Just get the last entry for now
+
+            # Return data in the correct format
+            return {
+                "Timestamp": most_recent_data.get('timestamp', most_recent_data.get('Timestamp', 'N/A')),
+                "Description": most_recent_data.get('textDescription', most_recent_data.get('Description', 'N/A')),
+                "Temperature": most_recent_data.get('Temperature', 'N/A'),
+                "Dewpoint": most_recent_data.get('Dewpoint', 'N/A'),
+                "Wind Speed": most_recent_data.get('Wind Speed', 'N/A'),
+                "Humidity": most_recent_data.get('Humidity', 'N/A'),
+                "Station": most_recent_data.get('Station', 'N/A'),
+                "City": most_recent_data.get('City', 'N/A')
+            }
+        except Exception as e:
+            print(f"Error in get_most_recent_data_for_station: {e}")
+            return None
 
     @staticmethod
     def load_data(filename):
