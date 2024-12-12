@@ -89,8 +89,19 @@ class WeatherAppGUI:
         city_name = california_station_codes_with_cities.get(station_code, 'Unknown City')
         self.weather_data_display.delete(1.0, tk.END)
         self.weather_data_display.insert(tk.END, f"Weather Data for {station_code} ({city_name}):\n")
-        for key, wd_value in weather_data.items():
-            self.weather_data_display.insert(tk.END, f"{key}: {wd_value}\n")
+
+        # Format the display data
+        formatted_data = {
+            "Timestamp": weather_data.get('timestamp', 'N/A'),
+            "Description": weather_data.get('textDescription', 'N/A'),
+            "Temperature": f"{weather_data.get('temperature', {}).get('value', 'N/A')} °C",
+            "Dewpoint": f"{weather_data.get('dewpoint', {}).get('value', 'N/A')} °C",
+            "Wind Speed": f"{weather_data.get('windSpeed', {}).get('value', 'N/A')} km/h",
+            "Humidity": f"{weather_data.get('relativeHumidity', {}).get('value', 'N/A')} %"
+        }
+
+        for key, value in formatted_data.items():
+            self.weather_data_display.insert(tk.END, f"{key}: {value}\n")
 
     def display_manager_details(self):
         manager_details = str(self.wdm)

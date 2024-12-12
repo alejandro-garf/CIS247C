@@ -48,23 +48,12 @@ class WeatherDataFetcher:
             properties = data["properties"]
             weather_data = {
                 "Timestamp": properties.get("timestamp", "N/A"),
-                "Description": properties["textDescription"]
+                "Description": properties["textDescription"],
+                "Temperature": f"{properties['temperature']['value']} °C",
+                "Dewpoint": f"{properties['dewpoint']['value']} °C",
+                "Wind Speed": f"{properties['windSpeed']['value']} km/h",
+                "Humidity": f"{properties['relativeHumidity']['value']} %"
             }
-
-            label_mapping = {
-                "temperature": "Temperature",
-                "dewpoint": "Dewpoint",
-                "windSpeed": "Wind Speed",
-                "relativeHumidity": "Humidity"
-            }
-
-            for prop, label in label_mapping.items():
-                value = properties[prop]["value"]
-                unit_code = properties[prop]["unitCode"]
-                unit = self.convert_unit(unit_code)
-
-                weather_data[label] = f"{value} {unit}" if value is not None else "N/A"
-
             return weather_data
 
         except KeyError as e:
